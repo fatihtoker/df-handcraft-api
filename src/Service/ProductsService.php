@@ -170,7 +170,6 @@ class ProductsService
             $uploadedFile->setDocumentFile($image);
             $uploadedFile->setProduct($product);
             $this->em->persist($uploadedFile);
-            $product->addImage($image);
             
         }
 
