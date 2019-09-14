@@ -38,6 +38,8 @@ class Parameter
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\ParameterType")
      * @ORM\JoinColumn(nullable=false)
+     * @Serializer\Expose()
+     * @Serializer\Groups({"Default"})
      */
     private $parameterType;
 

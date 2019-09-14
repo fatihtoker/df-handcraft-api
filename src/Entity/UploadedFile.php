@@ -25,6 +25,7 @@ class UploadedFile
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @Serializer\Expose()
+     * @Serializer\Groups({"Default", "products_list"})
      */
     private $id;
 
@@ -66,6 +67,7 @@ class UploadedFile
      * @ORM\Column(type="string", length=255, unique=true)
      *
      * @Serializer\Expose()
+     * @Serializer\Groups({"Default", "products_list"})
      */
     private $uniqueName;
 
@@ -74,6 +76,7 @@ class UploadedFile
      *
      * @ORM\Column(type="string", length=255)
      * @Serializer\Expose()
+     * @Serializer\Groups({"Default", "products_list"})
      */
     private $folder;
 

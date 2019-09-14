@@ -75,7 +75,7 @@ class Product
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\UploadedFile", mappedBy="product")
      * @Serializer\Expose()
-     * @Serializer\Groups({"Default"})
+     * @Serializer\Groups({"Default", "products_list"})
      */
     private $images;
 
@@ -190,6 +190,20 @@ class Product
             }
         }
 
+        return $this;
+    }
+
+    public function emptyImages(): self
+    {
+        foreach ($this->images as $image) {
+            if ($this->images->contains($image)) {
+                $this->images->removeElement($image);
+                // set the owning side to null (unless already changed)
+                if ($image->getProduct() === $this) {
+                    $image->setProduct(null);
+                }
+            }
+        }
         return $this;
     }
 }

@@ -122,6 +122,7 @@ class ProductsService
     {
         $productRepo = $this->em->getRepository(Product::class);
         $paramRepo = $this->em->getRepository(Parameter::class);
+        $uploadedFileRepo = $this->em->getRepository(UploadedFile::class);
 
         $id = $request->get('id');
         $name = $request->get('name');
@@ -132,7 +133,7 @@ class ProductsService
         $_type = $request->get('type');
         $images = $request->files->all();
 
-        if (!($name && $_category && $description && $onSale && $price && $images)) {
+        if (!($name && $_category && $description && $onSale && $price)) {
             return ApiResponse::createErrorResponse(422, 'Zorunlu alanlar boş bırakılamaz', []);
         }
 
@@ -156,6 +157,14 @@ class ProductsService
 
         $this->em->persist($product);
         $this->em->flush();
+
+        if ($id) {
+            $oldImages = $uploadedFileRepo->findBy(['product' => $id]);
+            foreach ($oldImages as $oldImage) {
+                $this->em->remove($oldImage);
+            }
+            
+        }
 
         foreach ($images as $image) {
             // todo: handle update
@@ -192,6 +201,6 @@ class ProductsService
             return ApiResponse::createErrorResponse(422, 'Ürün bulunamadı.', []);
         }
 
-        return ApiResponse::createSuccessResponse(['obj' => $product, 'imgUrl' => $this->uploaderHelper->asset($product, 'imageFile')]);
+        return ApiResponse::createSuccessResponse($product);
     }
 }
