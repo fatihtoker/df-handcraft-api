@@ -6,6 +6,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use App\Entity\ParameterType;
 use App\Response\ApiResponse;
+use App\Service\Shared\RequestValidationService;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class ParameterTypesService
 {
@@ -14,9 +16,15 @@ class ParameterTypesService
      */
     private $em;
 
-    public function __construct(EntityManagerInterface $em)
+    /**
+     * @var RequestValidationService
+     */
+    private $validator;
+
+    public function __construct(EntityManagerInterface $em, RequestValidationService $validator)
     {
         $this->em = $em;
+        $this->validator = $validator;
     }
 
     public function getAll(Request $request)
@@ -36,8 +44,17 @@ class ParameterTypesService
         $name = $request->get('name');
         $displayName = $request->get('displayName');
 
-        if (!($name && $displayName)) {
-            return ApiResponse::createErrorResponse(422, 'Zorunlu alanlar boş bırakılamaz', []);
+        $hasError = $this->validator->validate($request, [
+            'name'          => [new NotBlank([
+                'message' => 'Bu değer boş bırakılamaz.'
+            ])],
+            'displayName'   => [new NotBlank([
+                'message' => 'Bu değer boş bırakılamaz.'
+            ])]
+        ]);
+
+        if ($hasError) {
+            return $hasError;
         }
 
         if ($id) {

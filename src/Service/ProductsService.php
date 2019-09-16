@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\Request;
 use App\Response\ApiResponse;
 use Vich\UploaderBundle\Templating\Helper\UploaderHelper;
 use App\Entity\UploadedFile;
+use App\Service\Shared\RequestValidationService;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class ProductsService
 {
@@ -29,11 +31,17 @@ class ProductsService
      */
     private $uploaderHelper;
 
-    public function __construct(EntityManagerInterface $em, ProductRepository $repo, UploaderHelper $uploaderHelper)
+    /**
+     * @var RequestValidationService
+     */
+    private $validator;
+
+    public function __construct(EntityManagerInterface $em, ProductRepository $repo, UploaderHelper $uploaderHelper, RequestValidationService $validator)
     {
         $this->em = $em;
         $this->repo = $repo;
         $this->uploaderHelper = $uploaderHelper;
+        $this->validator = $validator;
     }
 
     public function getAll(Request $request, $filterOnSale = false)
@@ -124,18 +132,37 @@ class ProductsService
         $paramRepo = $this->em->getRepository(Parameter::class);
         $uploadedFileRepo = $this->em->getRepository(UploadedFile::class);
 
+
+
+        $hasError = $this->validator->validate($request, [
+            'name'          => [new NotBlank([
+                'message' => 'Bu değer boş bırakılamaz.'
+            ])],
+            'category'   => [new NotBlank([
+                'message' => 'Bu değer boş bırakılamaz.'
+            ])],
+            'onSale' => [new notBlank([
+                'message' => 'Bu değer boş bırakılamaz.'
+            ])],
+            'price' => [new notBlank([
+                'message' => 'Bu değer boş bırakılamaz.'
+            ])],
+        ]);
+
+        if ($hasError) {
+            return $hasError;
+        }
+
         $id = $request->get('id');
         $name = $request->get('name');
         $_category = $request->get('category');
         $description = $request->get('description');
-        $onSale = $request->get('onSale');
+        $_onSale = $request->get('onSale');
         $price = $request->get('price');
         $_type = $request->get('type');
         $images = $request->files->all();
 
-        if (!($name && $_category && $description && $onSale && $price)) {
-            return ApiResponse::createErrorResponse(422, 'Zorunlu alanlar boş bırakılamaz', []);
-        }
+        $onSale = ($_onSale === 'true');
 
         $category = $paramRepo->find($_category);
         $type = $paramRepo->find($_type);
@@ -154,6 +181,8 @@ class ProductsService
         $product->setOnSale($onSale);
         $product->setPrice($price);
         $product->setType($type);
+
+        
 
         $this->em->persist($product);
         $this->em->flush();

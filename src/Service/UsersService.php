@@ -8,6 +8,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use App\Response\ApiResponse;
+use App\Service\Shared\RequestValidationService;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class UsersService
 {
@@ -21,10 +23,16 @@ class UsersService
      */
     private $encoder;
 
-    public function __construct(EntityManagerInterface $em, UserPasswordEncoderInterface $encoder)
+    /**
+     * @var RequestValidationService
+     */
+    private $validator;
+
+    public function __construct(EntityManagerInterface $em, UserPasswordEncoderInterface $encoder, RequestValidationService $validator)
     {
         $this->em = $em;
         $this->encoder = $encoder;
+        $this->validator = $validator;
     }
 
     public function create(Request $request)
@@ -32,14 +40,26 @@ class UsersService
         $userRepo = $this->em->getRepository(User::class);
         $roleRepo = $this->em->getRepository(Role::class);
 
+        $hasError = $this->validator->validate($request, [
+            'email'          => [new NotBlank([
+                'message' => 'Bu değer boş bırakılamaz.'
+            ])],
+            'password'   => [new NotBlank([
+                'message' => 'Bu değer boş bırakılamaz.'
+            ])],
+            'roles'   => [new NotBlank([
+                'message' => 'Bu değer boş bırakılamaz.'
+            ])]
+        ]);
+
+        if ($hasError) {
+            return $hasError;
+        }
+
         $id = $request->get('id');
         $email = $request->get('email');
         $plainPassword = $request->get('password');
         $roles = $request->get('roles');
-
-        if (!($email && $plainPassword && $roles)) {
-            return ApiResponse::createErrorResponse(422, 'Zorunlu alanlar boş bırakılamaz', []);
-        }
 
         $roleCollection = [];
 

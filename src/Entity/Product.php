@@ -6,9 +6,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
-use Symfony\Component\HttpFoundation\File\File;
-use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ProductRepository")
@@ -17,6 +16,7 @@ use Gedmo\Timestampable\Traits\TimestampableEntity;
  */
 class Product
 {
+    // TODO: Thumbnail Logic
     use TimestampableEntity;
 
     /**
@@ -30,6 +30,9 @@ class Product
 
     /**
      * @ORM\Column(type="string", length=255)
+     * 
+     * @Assert\NotBlank(message = "Bu alan boş bırakılamaz.")
+     * 
      * @Serializer\Expose()
      * @Serializer\Groups({"Default", "products_list", "product_category"})
      */
@@ -44,6 +47,9 @@ class Product
 
     /**
      * @ORM\Column(type="boolean")
+     * 
+     * @Assert\NotBlank(message = "Bu alan boş bırakılamaz.")
+     * 
      * @Serializer\Expose()
      * @Serializer\Groups({"Default", "products_list"})
      */
@@ -51,6 +57,9 @@ class Product
 
     /**
      * @ORM\Column(type="integer")
+     * 
+     * @Assert\NotBlank(message = "Bu alan boş bırakılamaz.")
+     * 
      * @Serializer\Expose()
      * @Serializer\Groups({"Default", "products_list", "product_category"})
      */
@@ -59,6 +68,9 @@ class Product
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Parameter")
      * @ORM\JoinColumn(nullable=false)
+     * 
+     * @Assert\NotBlank(message = "Bu alan boş bırakılamaz.")
+     * 
      * @Serializer\Expose()
      * @Serializer\Groups({"Default", "products_list"})
      */
