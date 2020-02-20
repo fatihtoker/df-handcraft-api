@@ -18,7 +18,8 @@ class AppFixtures extends Fixture implements DependentFixtureInterface
             ParameterTypeFixtures::class,
             ParameterFixtures::class,
             UserFixtures::class,
-            ProductFixtures::class
+            ProductFixtures::class,
+            MenuFixtures::class
         );
     }
 }
